@@ -59,14 +59,16 @@ HAMZA METS L'ARCHITECTURE DU PROJET
 - Redirige les requêtes vers le frontend et le backend
 - Simplifie la gestion des accès HTTP
 
----
 
 ## Variables d’environnement et sécurité
 Les variables sensibles sont stockées dans un fichier `.env`.
 Le mot de passe de la base de données est géré via un **secret Docker**,
 ce qui évite de l’exposer directement dans les fichiers Docker Compose.
 
----
+
+### NB: 
+La gestion du mot de passe PostgreSQL est assurée via un secret Docker (`POSTGRES_PASSWORD_FILE`), conformément aux bonnes pratiques, après correction d’un conflit avec `POSTGRES_PASSWORD`.
+
 
 ## Lancement du projet
 
