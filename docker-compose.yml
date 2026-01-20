@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./services/backend
+    container_name: ecommerce_api
+    env_file:
+      - .env
+    ports:
+      - "${BACKEND_PORT}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    secrets:
+      - db_password
+    networks:
+      - ecommerce_network
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: ecommerce_db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecommerce_network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: ecommerce_pgadmin
+    env_file:
+      - .env
+    environment:
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - ecommerce_network
+
+  frontend:
+    build: ./services/frontend
+    container_name: ecommerce_frontend
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
+    depends_on:
+      - api
+    networks:
+      - ecommerce_network
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+secrets:
+  db_password:
+    file: ./services/secrets/db_password.txt
+
+networks:
+  ecommerce_network:
+    driver: bridge
