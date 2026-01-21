@@ -70,9 +70,42 @@ ce qui évite de l’exposer directement dans les fichiers Docker Compose.
 La gestion du mot de passe PostgreSQL est assurée via un secret Docker (`POSTGRES_PASSWORD_FILE`), conformément aux bonnes pratiques, après correction d’un conflit avec `POSTGRES_PASSWORD`.
 
 
-## Lancement du projet
+## Lancement du projet avec Task
 
 ### Démarrer tous les services
+
+Un fichier Taskfile est utilisé afin de simplifier l’exécution des commandes Docker Compose et d’automatiser les actions courantes du projet.
+
+```bash
+winget install -e --id Task.Task
+
+
+```bash
+# Lister les tâches
+task
+
+# Lancer tout le projet
+task up
+
+# Arrêter le projet
+task down
+
+# Voir les logs
+task logs
+
+# Reset complet (attention)
+task clean
+```
+
+## Alternative à Task (sans installation supplémentaire)
+
+L’outil Task est utilisé pour automatiser certaines commandes Docker.  
+Cependant, si Task n’est pas installé sur la machine, les commandes peuvent être exécutées directement via Docker Compose.
+
+### Démarrer le projet
+
 ```bash
 docker-compose up -d
+
+
 

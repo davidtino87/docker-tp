@@ -1,0 +1,51 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Lister les tâches disponibles
+    cmds:
+      - task --list
+
+  up:
+    desc: Démarrer tous les services (backend, frontend, db, caddy)
+    cmds:
+      - docker-compose up -d
+
+  down:
+    desc: Arrêter tous les services
+    cmds:
+      - docker-compose down
+
+  restart:
+    desc: Redémarrer tous les services
+    cmds:
+      - docker-compose down
+      - docker-compose up -d
+
+  build:
+    desc: Rebuild des images Docker
+    cmds:
+      - docker-compose build
+
+  logs:
+    desc: Afficher les logs de tous les services
+    cmds:
+      - docker-compose logs -f
+
+  backend:
+    desc: Lancer uniquement le backend
+    cmds:
+      - docker-compose -f compose.backend.yml up -d
+
+  frontend:
+    desc: Lancer uniquement le frontend
+    cmds:
+      - docker-compose -f compose.frontend.yml up -d
+
+  clean:
+    desc: Supprimer conteneurs, volumes et réseaux (reset complet)
+    cmds:
+      - docker-compose down -v
+      - docker system prune -f
+      - docker volume prune -f
+      - docker network prune -f
