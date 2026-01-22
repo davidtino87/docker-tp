@@ -1,4 +1,5 @@
-# docker-tp
+# EcomFlow Platform
+### Full-Stack E-commerce Platform – FastAPI, React, PostgreSQL, Docker
 
 ## Membres du groupe
 - David CIRAKAZA
