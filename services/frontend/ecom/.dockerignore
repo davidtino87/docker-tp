@@ -3,5 +3,11 @@ dist
 .git
 Dockerfile 
 docker-compose.yml 
-
+.env
+.env.local
+npm-debug.log*
+coverage
+.vscode
+.idea
+.md
 

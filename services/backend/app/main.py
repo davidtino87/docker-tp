@@ -27,10 +27,23 @@ app.include_router(product_router)
 app.include_router(category_router)
 
 
+# ============================================================
+# ENDPOINT DE SANTE (health check ) 
+# ============================================================
 
+@app.get("/health")
+async def health_check():
+    """
+    Endpoint de vérification de santé pour Docker healthcheck
+    """
+    return {
+        "status": "healthy",
+        "service": "fastapi-backend",
+        "version": "1.0.0"
+    }
 
 # ============================================================
-# Route racine (health check / welcome) 
+# Route racine (welcome) 
 # ============================================================
 
 @app.get("/", status_code=200)

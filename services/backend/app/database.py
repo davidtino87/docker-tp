@@ -5,11 +5,11 @@ import psycopg
 
 # Paramètres de connexion (identiques au docker-compose.yml)
 DB_CONFIG = {
-    "host": "sales_db",
+    "host": "ecom_db",
     "port": 5432,
-    "dbname": "sales_db",
+    "dbname": "ecom_db",
     "user": "admin",
-    "password": "root123"
+    "password": "admin@123"
 }
 
 def get_connection():
