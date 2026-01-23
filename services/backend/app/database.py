@@ -2,14 +2,17 @@
 Connexion simple à PostgreSQL
 """
 import psycopg
+import os 
+from dotenv import load_dotenv
+
 
 # Paramètres de connexion (identiques au docker-compose.yml)
 DB_CONFIG = {
-    "host": "ecom_db",
-    "port": 5432,
-    "dbname": "ecom_db",
-    "user": "admin",
-    "password": "admin@123"
+    "host": os.getenv("POSTGRES_DB", "localhost"),
+    "port": int(os.getenv("DB_PORT", 5432)),
+    "dbname": os.getenv("POSTGRES_DB", "postgres"),
+    "user": os.getenv("POSTGRES_USER", "postgres"),
+    "password": os.getenv("POSTGRES_PASSWORD", "password")
 }
 
 def get_connection():
