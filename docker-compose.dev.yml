@@ -1,0 +1,169 @@
+# ================================
+# CONFIGURATION DE DEVELOPPEMENT
+# ================================
+services:
+  # ================================
+  # FRONTEND
+  # ================================
+  frontend:
+    container_name: vite-react
+    build:
+      context: ./services/frontend/ecom
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./services/frontend/ecom:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://localhost:8000
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app_network
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ================================
+  # BACKEND
+  # ================================
+  backend:
+    container_name: fastapi-backend
+    build:
+      context: ./services/backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./services/backend:/app
+      - /app/__pycache__
+    env_file:
+      - .env.dev
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@ecom_db:5432/${POSTGRES_DB}
+    restart: unless-stopped
+    networks:
+      - app_network
+      - db_network
+    depends_on:
+      ecom_db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ================================
+  # DATABASE
+  # ================================
+  ecom_db:
+    image: postgres:16-alpine
+    container_name: ecom_db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.dev
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infrastructure/database/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    networks:
+      - db_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ================================
+  # ADMINER
+  # ================================
+  adminer:
+    image: adminer:latest
+    container_name: db-admin
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: ecom_db
+      ADMINER_DESIGN: pepa-linha
+    networks:
+      - db_network
+      - app_network
+    depends_on:
+      ecom_db:
+        condition: service_healthy
+
+  # ================================
+  # CADDY
+  # ================================
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy-proxy
+    restart: unless-stopped
+    environment:
+      - FRONTEND_TARGET_PORT=5173
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - app_network
+    depends_on:
+      - frontend
+      - backend
+      - adminer
+
+  # ================================
+  # CLOUDFLARE TUNNEL
+  # ================================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflare-tunnel
+    restart: unless-stopped
+    networks:
+      - app_network
+    depends_on:
+      - caddy
+    profiles:
+      - production
+
+# ================================
+# VOLUMES
+# ================================
+volumes:
+  pgdata:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+# ================================
+# NETWORKS
+# ================================
+networks:
+  app_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+    internal: true

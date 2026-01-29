@@ -24,6 +24,10 @@ COPY package*.json ./
 RUN npm ci --production=false --no-audit --no-fund
 
 COPY . .
+
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # ================================
@@ -31,7 +35,7 @@ RUN npm run build
 # ================================
 FROM nginx:alpine AS production
 
-# Copier la config Nginx
+# Copy custom nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copier les fichiers buildés

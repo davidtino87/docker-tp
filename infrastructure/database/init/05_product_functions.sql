@@ -18,15 +18,17 @@ $$ LANGUAGE plpgsql;
 
 
 -- ===========================================================
--- Chercher un produit par son nom 
+-- Chercher un produit par son nom (et optionnellement categorie)
 -- ===========================================================
-CREATE OR REPLACE FUNCTION search_product(p_name TEXT)
+CREATE OR REPLACE FUNCTION search_product(p_name TEXT, p_category_id INT DEFAULT NULL)
 RETURNS SETOF product AS $$
 BEGIN
     RETURN QUERY
-    SELECT *
-    FROM product
-    WHERE name ILIKE '%' || p_name || '%';
+    SELECT p.*
+    FROM product p
+    LEFT JOIN product_category pc ON p.product_id = pc.product_id
+    WHERE p.name ILIKE '%' || p_name || '%'
+    AND (p_category_id IS NULL OR pc.category_id = p_category_id);
 END;
 $$ LANGUAGE plpgsql;
 

@@ -53,13 +53,13 @@ def get_product_by_id(product_id: int):
 # ============================================================
 
 @router.get("/", status_code=status.HTTP_200_OK)
-def search_products(name: str = ""):
+def search_products(name: str = "", category_id: int | None = None):
     """
-    Rechercher des produits par nom
+    Rechercher des produits par nom et/ou catégorie
     """
     try:
-        sql = "SELECT * FROM search_product(%s);"
-        results = execute_query(sql, (name,))
+        sql = "SELECT * FROM search_product(%s, %s);"
+        results = execute_query(sql, (name, category_id))
     except Exception :
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

@@ -1,0 +1,35 @@
+@startuml
+!theme materia
+skinparam componentStyle uml2
+
+actor "User (Internet)" as User
+
+cloud "Cloudflare Tunnel" as Tunnel {
+  component "cloudflared" as Cloudflared
+}
+
+node "Docker Host" {
+  component "Caddy (Reverse Proxy)" as Proxy
+  
+  package "Application" {
+    component "Frontend (Vite+React)" as Frontend
+    component "Backend (FastAPI)" as Backend
+  }
+  
+  package "Data Layer" {
+    database "PostgreSQL (ecom_db)" as DB
+    component "Adminer" as Adminer
+  }
+}
+
+User --> Tunnel : HTTPS
+Tunnel --> Proxy : HTTP (Local)
+Proxy --> Frontend : / (Static/SPA)
+Proxy --> Backend : /api, /docs
+Proxy --> Adminer : /db
+
+Frontend --> Backend : REST API
+Backend --> DB : SQL (5432)
+Adminer --> DB : SQL (5432)
+
+@enduml

@@ -1,4 +1,36 @@
-node_modules 
-.env 
+# Environnement
+.env
+*.env.local
+.env.production
 
+# Volumes Docker
+volumes/
 
+# Logs
+*.log
+logs/
+
+# Base de données
+infrastructure/database/backups/*.sql
+infrastructure/database/backups/*.dump
+
+# Cloudflare credentials
+infrastructure/cloudflare/credentials.json
+infrastructure/cloudflare/cert.pem
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+venv/
+env/
