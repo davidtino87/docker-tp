@@ -27,7 +27,7 @@
 ### Schéma d'infrastructure
 *Ce schéma est généré dynamiquement à partir du fichier `architecture.puml`.*
 
-![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/davidtino87/docker-tp/branch/hamza/architecture.puml)
+![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/davidtino87/docker-tp/tree/main/architecture.puml)
 
 ### Description des services
 | Service | Image Docker | Rôle | Port Interne |
@@ -128,3 +128,52 @@ docker-compose -f docker-compose.dev.yml logs -f [service_name]
 ```bash
 docker-compose -f docker-compose.prod.yml down -v --rmi all
 ```
+
+## 4. Méthodologie & Transparence IA
+
+### Organisation
+
+La méthodologie de travail suivie consistait à ce que chacun dockerise le projet de A à Z afin de bien comprendre le fonctionnement, l’architecture adoptée et les services utilisés. Ensuite, chacun déployait le projet dans sa propre branche via GitHub.
+
+Après cela, nous avons fait un point pour échanger les acquis et déployer une version finale améliorée sur la branche main.
+
+### Utilisation de l'IA (Copilot, ChatGPT, Cursor...)
+
+* **Outils utilisés :** (Claude , GEMINI, ANTIGRAVITY)
+* **Usage :**
+    * *Génération de code :Nous avons utilisé Antigravity Agent AI pour générer la partie frontend et consommer les API de la partie backend, qui était déjà prête,     ainsi que pour l’amélioration et la suggestion de nouvelles fonctionnalités.
+    * *Débuggage : Le débogage a également été réalisé par Antigravity Agent AI. Les problèmes rencontrés sont présentés ci-dessous.
+* **Apprentissage :** 
+* L’IA a joué un rôle clé dans l’amélioration et la stabilisation de l’architecture Docker du projet. Elle m’a accompagné dans la conversion des Dockerfiles en Dockerfiles multi-stage, ce qui m’a permis de comprendre comment gérer efficacement tout le cycle de vie de l’application (développement, build et production), optimiser la taille des images et renforcer la sécurité.
+
+* Elle m’a également conseillé de séparer la configuration en deux fichiers Docker Compose, l’un pour le développement et l’autre pour la production, afin d’améliorer la sécurité en évitant l’exposition inutile des ports et de faciliter la maintenance grâce à une meilleure lisibilité de l’architecture.
+
+* Par ailleurs, l’IA m’a aidé à résoudre plusieurs problèmes techniques, notamment le Hot Reload du frontend via l’utilisation correcte des volumes Docker, l’initialisation de PostgreSQL et la gestion des volumes, ainsi que l’orchestration des services à l’aide de depends_on et des health checks. Enfin, elle m’a guidé dans la configuration de Cloudflared et de Cloudflare, me permettant de comprendre le fonctionnement des tunnels, du routage interne et de la gestion DNS.
+
+* Grâce à cet accompagnement, j’ai acquis une meilleure compréhension des principes fondamentaux de Docker, de l’orchestration des services et du déploiement sécurisé d’une application en environnement de production.
+
+## 5. Difficultés rencontrées & Solutions
+
+* Problème 1 : Les modifications du code Frontend ne s'affichaient pas en temps réel dans le conteneur (Hot Reload inactif).
+
+* Solution 1 : Montage d'un volume bind-mount (./services/frontend/ecom:/app) et activation du mode Polling (CHOKIDAR_USEPOLLING=true) pour forcer la détection des changements de fichiers sous Docker.
+
+* Problème 2 : Les scripts SQL placés dans /docker-entrypoint-initdb.d n’étaient pas exécutés.
+
+* Solution 2 : Suppression du volume existant contenant déjà une base initialisée, car PostgreSQL n’exécute les scripts d’initialisation que lors du premier démarrage.
+
+* Problème 3 : Les services démarraient dans le mauvais ordre.
+
+* Solution 3 : Ajout de depends_on avec condition: service_healthy pour garantir que :
+
+    * PostgreSQL démarre avant le backend
+    * Backend démarre avant le frontend
+
+* Problème 4 : Le service cloudflared ne démarrait pas automatiquement ou ne trouvait pas ses instructions.
+
+* Solution 4 : Ajout de la commande tunnel run dans le service Docker Compose et utilisation d'une variable d'environnement TUNNEL_TOKEN pour une gestion centralisée via le Dashboard Cloudflare (évitant l'usage d'un fichier config.yml local).    
+
+* Problème 5 : Le tunnel Cloudflare affichait une erreur 522 (Connection Timed Out) lors de l'accès au domaine.
+
+* Solution 5 : Configuration correcte du Public Hostname dans le tableau de bord Cloudflare pour rediriger le trafic vers le service interne http://caddy:80 et suppression des anciens enregistrements DNS (A/CNAME) conflictuels.   
+
