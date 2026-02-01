@@ -27,7 +27,7 @@
 ### Schéma d'infrastructure
 *Ce schéma est généré dynamiquement à partir du fichier `architecture.puml`.*
 
-![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/davidtino87/docker-tp/tree/main/architecture.puml)
+![Architecture du Projet](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/davidtino87/docker-tp/main/architecture.puml)
 
 ### Description des services
 | Service | Image Docker | Rôle | Port Interne |
